@@ -24,11 +24,7 @@ function getItem($browser, $code) {
     $respostaRaw = $browser->get('https://www.magazineluiza.com.br/_next/data/' . $code . '/busca/computadores.json?path1=computadores');
     $resposta = gzdecode($respostaRaw);
     
-    var_dump($respostaRaw); //to do why not working
-    var_dump($resposta);
     preg_match_all('/"title":"([^"]+)".*?"price":"([^"]+)".*?"image":"([^"]+)".*?"url":"([^"]+)/', $resposta, $resultados, PREG_SET_ORDER);
-
-    var_dump($resultados);
 
     return $resultados;
 }
@@ -61,6 +57,5 @@ $browser = new SimpleBrowser();
 configurarHeaders($browser);
 $code = getCode($browser);
 $resultados = getItem($browser, $code);
-var_dump($resultados);
 mostrarProduto($resultados);
 ?>
