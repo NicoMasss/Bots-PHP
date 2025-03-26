@@ -13,7 +13,7 @@ function getCode($browser) {
     $browser->get('https://www.magazineluiza.com.br/');
 
     $dataRaw = $browser->getContent();
-    $dataHtml = gzdecode($dataRaw);
+    $dataHtml = mb_strpos($dataRaw, "\x1f\x8b") === 0 ? gzdecode($dataRaw) : $dataRaw; //verificação de Gzip
 
     preg_match('/static\/(\S{0,30})\/_buildManifest/', $dataHtml, $code);
 
@@ -22,7 +22,8 @@ function getCode($browser) {
 
 function getItem($browser, $code) {
     $respostaRaw = $browser->get('https://www.magazineluiza.com.br/_next/data/' . $code . '/busca/computadores.json?path1=computadores');
-    $resposta = gzdecode($respostaRaw);
+
+    $resposta = mb_strpos($respostaRaw, "\x1f\x8b") === 0 ? gzdecode($respostaRaw) : $respostaRaw;
     
     preg_match_all('/"title":"([^"]+)".*?"price":"([^"]+)".*?"image":"([^"]+)".*?"url":"([^"]+)/', $resposta, $resultados, PREG_SET_ORDER);
 
@@ -57,5 +58,5 @@ $browser = new SimpleBrowser();
 configurarHeaders($browser);
 $code = getCode($browser);
 $resultados = getItem($browser, $code);
-mostrarProduto($resultados);
+mostrarProduto($resultados)
 ?>
