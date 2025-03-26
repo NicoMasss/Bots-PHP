@@ -27,7 +27,7 @@ if (isset($_POST['pesquisa'])) {
 
         $resposta = mb_strpos($respostaRaw, "\x1f\x8b") === 0 ? gzdecode($respostaRaw) : $respostaRaw;
 
-        preg_match_all('/"title":"([^"]+)".*?"price":"([^"]+)".*?"image":"([^"]+)".*?"url":"([^"]+)/', $resposta, $resultados, PREG_SET_ORDER);
+        preg_match_all('/"title":"([^"]+)".*?"price":"([^"]+)".*?"image":"([^"]+)".*?"path":"([^"]+)/', $resposta, $resultados, PREG_SET_ORDER);
 
         return $resultados;
     }
@@ -38,7 +38,7 @@ if (isset($_POST['pesquisa'])) {
             $nomeProduto = $resultado[1];
             $preco = $resultado[2];
             $linkImagem = $resultado[3];
-            $linkProduto = $resultado[4];
+            $linkProduto = "https://www.magazineluiza.com.br/" . $resultado[4];
 
             $produto = [
                 "nomeProduto" => $nomeProduto,
