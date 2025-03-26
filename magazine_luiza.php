@@ -1,62 +1,61 @@
 <?php
 
-require_once 'simpletest/browser.php';
+if (isset($_POST['pesquisa'])) {
+    require_once 'simpletest/browser.php';
 
-function configurarHeaders($browser) {
-    $browser->addHeader('Accept: application/json');
-    $browser->addHeader('Accept-Encoding: gzip, deflate, br');
-    $browser->addHeader('Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7');
-    $browser->addHeader('User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36');
-}
+    function configurarHeaders($browser) {
+        $browser->addHeader('Accept: application/json');
+        $browser->addHeader('Accept-Encoding: gzip, deflate, br');
+        $browser->addHeader('Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7');
+        $browser->addHeader('User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36');
+    }
 
-function getCode($browser) {
-    $browser->get('https://www.magazineluiza.com.br/');
+    function getCode($browser) {
+        $browser->get('https://www.magazineluiza.com.br/');
 
-    $dataRaw = $browser->getContent();
-    $dataHtml = mb_strpos($dataRaw, "\x1f\x8b") === 0 ? gzdecode($dataRaw) : $dataRaw; //verificação de Gzip
+        $dataRaw = $browser->getContent();
+        $dataHtml = mb_strpos($dataRaw, "\x1f\x8b") === 0 ? gzdecode($dataRaw) : $dataRaw; //verificação de Gzip
 
-    preg_match('/static\/(\S{0,30})\/_buildManifest/', $dataHtml, $code);
+        preg_match('/static\/(\S{0,30})\/_buildManifest/', $dataHtml, $code);
 
-    return $code[1];
-}
+        return $code[1];
+    }
 
-function getItem($browser, $code) {
-    $respostaRaw = $browser->get('https://www.magazineluiza.com.br/_next/data/' . $code . '/busca/computadores.json?path1=computadores');
+    function getItem($browser, $code) {
+        $pesquisa = $_POST['pesquisa'];
+        $respostaRaw = $browser->get('https://www.magazineluiza.com.br/_next/data/' . $code . '/busca/'. $pesquisa . '.json?path1=' . $pesquisa);
 
-    $resposta = mb_strpos($respostaRaw, "\x1f\x8b") === 0 ? gzdecode($respostaRaw) : $respostaRaw;
-    
-    preg_match_all('/"title":"([^"]+)".*?"price":"([^"]+)".*?"image":"([^"]+)".*?"url":"([^"]+)/', $resposta, $resultados, PREG_SET_ORDER);
+        $resposta = mb_strpos($respostaRaw, "\x1f\x8b") === 0 ? gzdecode($respostaRaw) : $respostaRaw;
 
-    return $resultados;
-}
+        preg_match_all('/"title":"([^"]+)".*?"price":"([^"]+)".*?"image":"([^"]+)".*?"url":"([^"]+)/', $resposta, $resultados, PREG_SET_ORDER);
 
-function mostrarProduto($resultados) {
-    $produtos = [];
-    foreach ($resultados as $resultado) {
-        $nomeProduto = $resultado[1];
-        $preco = $resultado[2];
-        $linkImagem = $resultado[3];
-        $linkProduto = $resultado[4];
+        return $resultados;
+    }
 
-        $produto = [
-            "nomeProduto" => $nomeProduto,
-            "preco" => $preco,
-            "linkImagem" => $linkImagem,
-            "linkProduto" => $linkProduto
-        ];
+    function mostrarProduto($resultados) {
+        $produtos = [];
+        foreach ($resultados as $resultado) {
+            $nomeProduto = $resultado[1];
+            $preco = $resultado[2];
+            $linkImagem = $resultado[3];
+            $linkProduto = $resultado[4];
+
+            $produto = [
+                "nomeProduto" => $nomeProduto,
+                "preco" => $preco,
+                "linkImagem" => $linkImagem,
+                "linkProduto" => $linkProduto
+            ];
 
         $produtos[] = $produto;
     }
+        var_dump($produtos);   
+    }
 
-    $output = json_encode($produtos, JSON_PRETTY_PRINT);
-    $outputFormatado = "<pre>" . $output . "</pre>";
-
-    var_dump($outputFormatado);   
-}
-
-$browser = new SimpleBrowser();
-configurarHeaders($browser);
-$code = getCode($browser);
-$resultados = getItem($browser, $code);
-mostrarProduto($resultados)
+    $browser = new SimpleBrowser();
+    configurarHeaders($browser);
+    $code = getCode($browser);
+    $resultados = getItem($browser, $code);
+    mostrarProduto($resultados);
+};
 ?>
