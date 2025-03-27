@@ -23,11 +23,12 @@ if (isset($_POST['pesquisa'])) {
 
     function getItem($browser, $code) {
         $pesquisa = $_POST['pesquisa'];
+        $pesquisa = str_replace(" ", "%2B", $pesquisa);
         $respostaRaw = $browser->get('https://www.magazineluiza.com.br/_next/data/' . $code . '/busca/'. $pesquisa . '.json?path1=' . $pesquisa);
 
         $resposta = mb_strpos($respostaRaw, "\x1f\x8b") === 0 ? gzdecode($respostaRaw) : $respostaRaw;
 
-        preg_match_all('/"title":"([^"]+)".*?"price":"([^"]+)".*?"image":"([^"]+)".*?"path":"([^"]+)/', $resposta, $resultados, PREG_SET_ORDER);
+        preg_match_all('/"title":"([^"]+)".*?"image":"([^"]+)".*?"path":"([^"]+).*?"bestPrice":"([^"]+)"/', $resposta, $resultados, PREG_SET_ORDER);
 
         return $resultados;
     }
@@ -36,9 +37,9 @@ if (isset($_POST['pesquisa'])) {
         $produtos = [];
         foreach ($resultados as $resultado) {
             $nomeProduto = $resultado[1];
-            $preco = $resultado[2];
-            $linkImagem = $resultado[3];
-            $linkProduto = "https://www.magazineluiza.com.br/" . $resultado[4];
+            $preco = $resultado[4];
+            $linkImagem = $resultado[2];
+            $linkProduto = "https://www.magazineluiza.com.br/" . $resultado[3];
 
             $produto = [
                 "nomeProduto" => $nomeProduto,
