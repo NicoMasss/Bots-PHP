@@ -50,7 +50,10 @@ if (isset($_POST['pesquisa'])) {
 
         $produtos[] = $produto;
     }
-        var_dump($produtos);   
+        $produtosJson = json_encode($produtos);
+        
+        // var_dump($produtos); para debug
+        echo $produtosJson;
     }
 
     $browser = new SimpleBrowser();
